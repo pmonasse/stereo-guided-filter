@@ -1,41 +1,53 @@
-#ifndef _IMAGE_H
-#define _IMAGE_H
+#ifndef IMAGE_H
+#define IMAGE_H
 
-#include <stddef.h>
+/// Float image class, with shallow copy for performance.
+///
+/// Copy constructor and operator= perform a shallow copy, so pixels are shared.
+/// To perform a deep copy, use method clone().
+/// There is a constructor taking array of pixels; no copy is done, make sure
+/// the array exists during the lifetime of the image.
+/// The methods using color image assume consecutive channels (no interlace).
+class Image {
+    int* count;
+    float* tab;
+    int w, h;
+    float dist2Color(int x1,int y1, int x2,int y2) const;
+    void kill();
+public:
+    Image(int width, int height);
+    Image(float* pix, int width, int height);
+    Image(const Image& I);
+    ~Image() { kill(); }
+    Image& operator=(const Image& I);
+    Image clone() const;
 
-void image_r(float* image_color, float* image_red, size_t width, 
-               size_t height);
-void image_g(float* image_color, float* image_green, size_t width, 
-               size_t height);
-void image_b(float* image_color, float* image_blue, size_t width, 
-               size_t height);
+    int width() const { return w; }
+    int height() const { return h; }
+    float  operator()(int i,int j) const { return tab[j*w+i]; }
+    float& operator()(int i,int j)       { return tab[j*w+i]; }
 
+    Image r() const { return Image(tab+0*w*h,w,h); }
+    Image g() const { return Image(tab+1*w*h,w,h); }
+    Image b() const { return Image(tab+2*w*h,w,h); }
 
-void mirror_color(float* image_color, float* image_mirror, size_t width, 
-                    size_t height);
-void mirror_gray(float* image_gray, float* image_mirror, size_t width, 
-                   size_t height);
+    Image operator+(const Image& I) const;
+    Image operator-(const Image& I) const;
+    Image operator*(const Image& I) const;
 
+    // Filters
+    Image gradX() const;
+    void fillMaxX(float vMin);
+    Image boxFilter(int radius) const;
+    void median(int radius, Image& M) const;
+    Image medianColor(int radius) const;
+    Image weightedMedianColor(const Image& guidance,
+                              const Image& where, int vMin, int vMax,
+                              int radius,
+                              float sigmaSpace, float sigmaColor) const;
+};
 
-void sum(float* image_gray1, float* image_gray2, float * image_sum, 
-           size_t width, size_t height);
-      //image_sum = image_gray1 + image_gray2
-void substract(float* image_gray1, float* image_gray2, float * image_sub, 
-                 size_t width, size_t height);
-      //image_sub = image_gray1 - image_gray2
-void prod(float* image_gray1, float* image_gray2, float * image_prod, 
-            size_t width, size_t height);
-      //image_prod = image_gray1 * image_gray2
-
-
-void gradient_X(float* image_gray, float* image_grad, size_t width, 
-                  size_t height);
-
-
-void save_disparity(char* file_name, float* disparity_map, float disp_min, 
-                    float disp_max, size_t width, size_t height);
-void save_disparity_with_occlusion(char* file_name, float* disparity_map, 
-                                   float occlusion_value, float disp_min, 
-                                   float disp_max, size_t width, size_t height);
+void save_disparity(const char* file_name, const Image& disparity,
+                    float dispMin, float dispMax);
 
 #endif

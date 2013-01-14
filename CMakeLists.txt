@@ -2,11 +2,14 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 FIND_PACKAGE(PNG)
 
-SET(SRC 
-    filters.c filters.h
-    image.c image.h
+SET(SRC
+    cmdLine.h
+    costVolume.cpp costVolume.h
+    filters.cpp
+    image.cpp image.h
     io_png.c io_png.h
-    main.c)
+    main.cpp
+    occlusion.cpp occlusion.h)
 
 ADD_EXECUTABLE(costVolumeFilter ${SRC})
 TARGET_LINK_LIBRARIES(costVolumeFilter ${PNG_LIBRARIES})

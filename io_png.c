@@ -426,24 +426,8 @@ float *read_png_f32_gray(const char *fname, size_t * nxp, size_t * nyp)
         return img;
     else
     {
-        /* convert to gray */
-        float *ptr_r, *ptr_g, *ptr_b, *ptr_gray, *ptr_end;
-
-        /*
-         * RGB->gray conversion
-         * Y = (6969 * R + 23434 * G + 2365 * B)/32768
-         * integer approximation of
-         * Y = 0.212671 * R + 0.715160 * G + 0.072169 * B
-         */
-        ptr_r = img;
-        ptr_g = img + *nxp * *nyp;
-        ptr_b = img + 2 * *nxp * *nyp;
-        ptr_gray = img;
-        ptr_end = ptr_gray + *nxp * *nyp;
-        while (ptr_gray < ptr_end)
-            *ptr_gray++ = (float) (6969 * *ptr_r++
-                                   + 23434 * *ptr_g++
-                                   + 2365 * *ptr_b++) / 32768;
+        rgb_to_gray(img, img + *nxp * *nyp, img + 2 * *nxp * *nyp,
+                    *nxp, *nyp, img);
         /* resize and return the image */
         img = realloc(img, *nxp * *nyp * sizeof(float));
         return img;
@@ -684,4 +668,26 @@ int write_png_f32(const char *fname, const float *data,
     return write_png_raw(fname, (void *) data,
                          (png_uint_32) nx, (png_uint_32) ny, (png_byte) nc,
                          IO_PNG_F32);
+}
+
+/**
+ * @brief RGB->gray conversion
+ *
+ * Y = (6969 * R + 23434 * G + 2365 * B)/32768
+ * integer approximation of
+ * Y = 0.212671 * R + 0.715160 * G + 0.072169 * B
+ *
+ * @param ptr_r,ptr_g,ptr_b red, green and blue channels
+ * @param nxp,nyp number of columns and lines of the image
+ * @param ptr_gray output gray channel (can be pointer to one input channel)
+ */
+void rgb_to_gray(const float *ptr_r, const float *ptr_g, const float *ptr_b,
+                 size_t nxp, size_t nyp,
+                 float *ptr_gray)
+{
+        float *ptr_end = ptr_gray + nxp * nyp;
+        while (ptr_gray < ptr_end)
+            *ptr_gray++ = (float) (6969 * *ptr_r++
+                                   + 23434 * *ptr_g++
+                                   + 2365 * *ptr_b++) / 32768;
 }
