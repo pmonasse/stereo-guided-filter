@@ -89,7 +89,6 @@ int main(int argc, char *argv[])
     }
 
     Image disparity = filter_cost_volume(im1, im2, dispMin, dispMax, paramCV);
-
     save_disparity("disparity.png", disparity, dispMin, dispMax);
 
     if(detectOcc) {

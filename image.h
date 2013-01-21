@@ -48,7 +48,7 @@ public:
                               float sigmaSpace, float sigmaColor) const;
 };
 
-void save_disparity(const char* file_name, const Image& disparity,
+bool save_disparity(const char* file_name, const Image& disparity,
                     float dispMin, float dispMax);
 
 #endif
