@@ -1,5 +1,6 @@
 #include "image.h"
 #include <algorithm>
+#include <vector>
 #include <cmath>
 #include <cassert>
 
@@ -129,16 +130,19 @@ Image Image::weightedMedianColor(const Image& guidance,
     sColor = 1.0f/(sColor*sColor);
 
     const int size=vMax-vMin+1;
-    float* tab = new float[size];
+    std::vector<float> tab(size);
     Image M(w,h);
 
+#ifdef _OPENMP
+#pragma omp parallel for firstprivate(tab)
+#endif
     for(int y=0; y<h; y++)
         for(int x=0; x<w; x++) {
             if(where(x,y)>=vMin) {
                 M(x,y)=(*this)(x,y);
                 continue;
             }
-            std::fill(tab, tab+size, 0);
+            std::fill(tab.begin(), tab.end(), 0);
 
             float sum=0;
             for(int dy=-radius; dy<=radius; dy++)
@@ -155,9 +159,8 @@ Image Image::weightedMedianColor(const Image& guidance,
             float cumul=0;
             sum /= 2;
             while(cumul<sum)
-            cumul += tab[++d];
+                cumul += tab[++d];
             M(x,y) = vMin+d;
         }
-    delete [] tab;
     return M;
 }
