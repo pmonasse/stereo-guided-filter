@@ -11,11 +11,11 @@ static const char* OUTFILE2="disparity_occlusion.png";
 static const char* OUTFILE3="disparity_occlusion_filled.png";
 static const char* OUTFILE4="disparity_occlusion_filled_smoothed.png";
 
-static void usage() {
+static void usage(const char* name) {
     ParamCVFilter p;
     ParamOcclusion q;
     std::cerr << "Fast Cost-Volume Filtering for Visual Correspondence\n"
-              << "Usage: ./test [options] im1.png im2.png dmin dmax\n\n"
+              << "Usage: " << name << " [options] im1.png im2.png dmin dmax\n\n"
               << "Options (default values in parentheses)\n"
               << "Cost-volume filtering parameters:\n"
               << "    -R radius: radius of the guided filter ("
@@ -61,11 +61,11 @@ int main(int argc, char *argv[])
         cmd.process(argc, argv);
     } catch(std::string str) {
         std::cerr << "Error: " << str << std::endl<<std::endl;
-        usage();
+        usage(argv[0]);
         return 1;
     }
     if(argc!=5) {
-        usage();
+        usage(argv[0]);
         return 1;
     }
     bool detectOcc = cmd.used('o') || cmd.used('O');
