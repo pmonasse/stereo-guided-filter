@@ -56,6 +56,16 @@ Image Image::operator+(const Image& I) const {
     return S;
 }
 
+/// Addition
+Image& Image::operator+=(const Image& I) {
+    assert(w==I.w && h==I.h);
+    float* out=tab;
+    const float *in=I.tab;
+    for(int i=w*h-1; i>=0; i--)
+        *out++ += *in++;
+    return *this;
+}
+
 /// Subtraction
 Image Image::operator-(const Image& I) const {
     assert(w==I.w && h==I.h);

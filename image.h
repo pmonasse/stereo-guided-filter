@@ -34,6 +34,7 @@ public:
     Image operator+(const Image& I) const;
     Image operator-(const Image& I) const;
     Image operator*(const Image& I) const;
+    Image& operator+=(const Image& I);
 
     // Filters
     Image gradX() const;

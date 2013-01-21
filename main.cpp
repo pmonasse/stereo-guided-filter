@@ -10,7 +10,7 @@ static void usage() {
     ParamOcclusion q;
     std::cerr << "Fast Cost-Volume Filtering for Visual Correspondence\n"
               << "Usage: ./test [options] im1.png im2.png dmin dmax\n\n"
-              << "Options (default values in parenthesis)\n"
+              << "Options (default values in parentheses)\n"
               << "Cost-volume filtering parameters:\n"
               << "    -R radius: radius of the guided filter ("
               <<p.kernel_radius << ")\n"
@@ -19,9 +19,7 @@ static void usage() {
               << "    -C tau1: max for color difference ("
               <<p.color_threshold<<")\n"
               << "    -G tau2: max for gradient difference ("
-              <<p.gradient_threshold<<")\n"
-              << "    -B B: value of the extension constant ("
-              <<p.border_threshold<<")\n\n"
+              <<p.gradient_threshold<<")\n\n"
               << "Occlusion detection:\n"
               << "    -o: detect occlusion\n\n"
               << "Densification:\n"
@@ -45,7 +43,6 @@ int main(int argc, char *argv[])
     cmd.add( make_option('E',paramCV.epsilon) );
     cmd.add( make_option('C',paramCV.color_threshold) );
     cmd.add( make_option('G',paramCV.gradient_threshold) );
-    cmd.add( make_option('B',paramCV.border_threshold) );
 
     ParamOcclusion paramOcc; // Parameters for filling occlusions
     cmd.add( make_switch('o') ); // Detect occlusion

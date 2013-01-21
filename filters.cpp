@@ -28,10 +28,10 @@ Image Image::gradX() const {
     float* out=D.tab;
     for(int y=0; y<h; y++) {
         const float* in=tab+y*w;
-        *out++ = in[1]-in[0] +127.5f;
+        *out++ = in[1]-in[0];
         for(int x=1; x+1<w; x++, in++)
-            *out++ = .5f*(in[2]-in[0]) +127.5f;
-        *out++ = in[1]-in[0] +127.5f;
+            *out++ = .5f*(in[2]-in[0]);
+        *out++ = in[1]-in[0];
     }
     return D;
 }
