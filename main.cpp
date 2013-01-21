@@ -5,6 +5,12 @@
 #include "io_png.h"
 #include <iostream>
 
+/// Names of output image files
+static const char* OUTFILE1="disparity.png";
+static const char* OUTFILE2="disparity_occlusion.png";
+static const char* OUTFILE3="disparity_occlusion_filled.png";
+static const char* OUTFILE4="disparity_occlusion_filled_smoothed.png";
+
 static void usage() {
     ParamCVFilter p;
     ParamOcclusion q;
@@ -89,27 +95,37 @@ int main(int argc, char *argv[])
     }
 
     Image disparity = filter_cost_volume(im1, im2, dispMin, dispMax, paramCV);
-    save_disparity("disparity.png", disparity, dispMin, dispMax);
+    if(! save_disparity(OUTFILE1, disparity, dispMin, dispMax)) {
+        std::cerr << "Error writing file " << OUTFILE1 << std::endl;
+        return 1;
+    }
 
     if(detectOcc) {
         std::cout << "Detect occlusions...";
         Image disparity2= filter_cost_volume(im2,im1,-dispMax,-dispMin,paramCV);
         detect_occlusion(disparity, disparity2, dispMin-1);
-        save_disparity("disparity_occlusion.png", disparity, dispMin, dispMax);
+        if(! save_disparity(OUTFILE2, disparity, dispMin, dispMax))  {
+            std::cerr << "Error writing file " << OUTFILE2 << std::endl;
+            return 1;
+        }
     }
 
     if(fillOcc) {
         std::cout << "Post-processing: fill occlusions" << std::endl;
         Image dispDense = disparity.clone();
         dispDense.fillMaxX(dispMin);
-        save_disparity("disparity_occlusion_filled.png", dispDense, 
-                       dispMin, dispMax);
+        if(! save_disparity(OUTFILE3, dispDense, dispMin, dispMax)) {
+            std::cerr << "Error writing file " << OUTFILE3 << std::endl;
+            return 1;
+        }
 
         std::cout << "Post-processing: smooth the disparity map" << std::endl;
         fill_occlusion(dispDense, im1.medianColor(1),
                        disparity, dispMin, dispMax, paramOcc);
-        save_disparity("disparity_occlusion_filled_smoothed.png", disparity, 
-                       dispMin, dispMax);
+        if(! save_disparity(OUTFILE4, disparity, dispMin, dispMax)) {
+            std::cerr << "Error writing file " << OUTFILE4 << std::endl;
+            return 1;
+        }
     }
 
     free(pix1);
