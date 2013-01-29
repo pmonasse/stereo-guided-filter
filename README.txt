@@ -25,6 +25,9 @@ Densification:
     -c sigmac: value of sigma_color (25.5)
     -s sigmas: value of sigma_space (9)
 
+    -a grayMin: value of gray for min disparity (255)
+    -b grayMax: value of gray for max disparity (0)
+
 - Output image files
 disparity.png: disparity map after cost-volume filtering
 disparity_occlusion.png: after left-right check

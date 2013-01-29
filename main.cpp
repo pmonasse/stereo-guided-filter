@@ -35,12 +35,15 @@ static void usage(const char* name) {
               << "    -c sigmac: value of sigma_color ("
               <<q.sigma_color << ")\n"
               << "    -s sigmas: value of sigma_space ("
-              <<q.sigma_space << ")"
+              <<q.sigma_space << ")\n\n"
+              << "    -a grayMin: value of gray for min disparity (255)\n"
+              << "    -b grayMax: value of gray for max disparity (0)"
               << std::endl;
 }
 
 int main(int argc, char *argv[])
 {
+    int grayMin=255, grayMax=0;
     CmdLine cmd;
 
     ParamCVFilter paramCV; // Parameters for cost-volume filtering
@@ -57,6 +60,8 @@ int main(int argc, char *argv[])
     cmd.add( make_option('c',paramOcc.sigma_color) );
     cmd.add( make_option('s',paramOcc.sigma_space) );
 
+    cmd.add( make_option('a',grayMin) );
+    cmd.add( make_option('b',grayMax) );
     try {
         cmd.process(argc, argv);
     } catch(std::string str) {
@@ -73,8 +78,8 @@ int main(int argc, char *argv[])
 
     // Load images and convert to grayscale
     size_t width, height, width2, height2;
-    float* pix1 = read_png_f32_rgb(argv[1], &width, &height);
-    float* pix2 = read_png_f32_rgb(argv[2], &width2, &height2);
+    float* pix1 = io_png_read_f32_rgb(argv[1], &width, &height);
+    float* pix2 = io_png_read_f32_rgb(argv[2], &width2, &height2);
     if(width != width2 || height != height2) {
         std::cerr << "The images must have the same size!" << std::endl;
         return 1;
@@ -94,8 +99,11 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    float a=(grayMax-grayMin)/float(dispMax-dispMin);
+    float b=(grayMax*dispMin-grayMin*dispMax)/float(dispMax-dispMin);
+
     Image disparity = filter_cost_volume(im1, im2, dispMin, dispMax, paramCV);
-    if(! save_disparity(OUTFILE1, disparity, dispMin, dispMax)) {
+    if(! save_disparity(OUTFILE1, disparity, a,b)) {
         std::cerr << "Error writing file " << OUTFILE1 << std::endl;
         return 1;
     }
@@ -104,7 +112,7 @@ int main(int argc, char *argv[])
         std::cout << "Detect occlusions...";
         Image disparity2= filter_cost_volume(im2,im1,-dispMax,-dispMin,paramCV);
         detect_occlusion(disparity, disparity2, dispMin-1);
-        if(! save_disparity(OUTFILE2, disparity, dispMin, dispMax))  {
+        if(! save_disparity(OUTFILE2, disparity, a,b))  {
             std::cerr << "Error writing file " << OUTFILE2 << std::endl;
             return 1;
         }
@@ -114,7 +122,7 @@ int main(int argc, char *argv[])
         std::cout << "Post-processing: fill occlusions" << std::endl;
         Image dispDense = disparity.clone();
         dispDense.fillMaxX(dispMin);
-        if(! save_disparity(OUTFILE3, dispDense, dispMin, dispMax)) {
+        if(! save_disparity(OUTFILE3, dispDense, a,b)) {
             std::cerr << "Error writing file " << OUTFILE3 << std::endl;
             return 1;
         }
@@ -122,7 +130,7 @@ int main(int argc, char *argv[])
         std::cout << "Post-processing: smooth the disparity map" << std::endl;
         fill_occlusion(dispDense, im1.medianColor(1),
                        disparity, dispMin, dispMax, paramOcc);
-        if(! save_disparity(OUTFILE4, disparity, dispMin, dispMax)) {
+        if(! save_disparity(OUTFILE4, disparity, a,b)) {
             std::cerr << "Error writing file " << OUTFILE4 << std::endl;
             return 1;
         }

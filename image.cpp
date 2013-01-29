@@ -89,23 +89,20 @@ Image Image::operator*(const Image& I) const {
     return S;
 }
 
-/// Save \a disparity image in 8-bit PNG image. Pixels outside [dispMin,dispMax]
-/// are assumed invalid and written in cyan color.
+/// Save \a disparity image in 8-bit PNG image.
+///
+/// The disp->gray function is affine: gray=a*disp+b.
+/// Pixels outside [0,255] are assumed invalid and written in cyan color.
 bool save_disparity(const char* fileName, const Image& disparity,
-                    float dispMin, float dispMax)
+                    float a, float b)
 {
     const int w=disparity.width(), h=disparity.height();
-    float a=dispMin, b=dispMax;
-    // Linear map from [a,b] to [256,0]: 256*(b-x)/(b-a)=(b-x)*(256/(b-a))
-    a = 256.0f / (b-a);
     const float* in=&(const_cast<Image&>(disparity))(0,0);
     unsigned char *out = new unsigned char[3*w*h];
     unsigned char *red=out, *green=out+w*h, *blue=out+2*w*h;
-    for(size_t i=w*h; i>0; i--, in++, red++)
-        if(dispMin<=*in && *in<=dispMax) {
-            float v = (b-*in)*a;
-            if(v < 0.0f) v = 0.0f;
-            else if(v > 255.0f) v = 255.0f;
+    for(size_t i=w*h; i>0; i--, in++, red++) {
+        float v = a * *in + b;
+        if(0<=v && v<=255.0f) {
             *red = static_cast<unsigned char>(v);
             *green++ = *red;
             *blue++  = *red;
@@ -113,7 +110,8 @@ bool save_disparity(const char* fileName, const Image& disparity,
             *red=0;
             *green++ = *blue++ = 255;
         }
-    bool ok = (write_png_u8(fileName, out, w, h, 3) == 0);
+    }
+    bool ok = (io_png_write_u8(fileName, out, w, h, 3) == 0);
     delete [] out;
     return ok;
 }

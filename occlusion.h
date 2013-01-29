@@ -13,7 +13,7 @@ struct ParamOcclusion {
     ParamOcclusion()
     : sigma_space(9),
       sigma_color(255*0.1f),
-      median_radius(19) {}
+      median_radius(9) {}
 };
 
 void detect_occlusion(Image& disparityLeft, const Image& disparityRight,
