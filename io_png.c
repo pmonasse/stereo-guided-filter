@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Nicolas Limare <nicolas.limare@cmla.ens-cachan.fr>
+ * Copyright (c) 2010-2011, Nicolas Limare <nicolas.limare@cmla.ens-cachan.fr>
  * All rights reserved.
  *
  * This program is free software: you can redistribute it and/or modify
