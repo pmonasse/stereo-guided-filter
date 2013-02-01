@@ -49,6 +49,6 @@ public:
 };
 
 bool save_disparity(const char* file_name, const Image& disparity,
-                    float a, float b);
+                    int dMin, int dMax, int grayMin, int grayMax);
 
 #endif

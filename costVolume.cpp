@@ -103,7 +103,7 @@ Image filter_cost_volume(Image im1Color, Image im2Color,
 
     Image aR(width,height),aG(width,height),aB(width,height);
     Image dCost(width,height);
-    for(int d=dispMin; d<dispMax+1; d++) {
+    for(int d=dispMin; d<=dispMax; d++) {
         std::cout << '*' << std::flush;
         compute_cost(im1R,im1G,im1B, im2R,im2G,im2B, gradient1, gradient2,
                      d, param, dCost);

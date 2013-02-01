@@ -94,15 +94,20 @@ Image Image::operator*(const Image& I) const {
 /// The disp->gray function is affine: gray=a*disp+b.
 /// Pixels outside [0,255] are assumed invalid and written in cyan color.
 bool save_disparity(const char* fileName, const Image& disparity,
-                    float a, float b)
+                    int dMin, int dMax, int grayMin, int grayMax)
 {
+    const float a=(grayMax-grayMin)/float(dMax-dMin);
+    const float b=(grayMin*dMax-grayMax*dMin)/float(dMax-dMin);
+
     const int w=disparity.width(), h=disparity.height();
     const float* in=&(const_cast<Image&>(disparity))(0,0);
     unsigned char *out = new unsigned char[3*w*h];
     unsigned char *red=out, *green=out+w*h, *blue=out+2*w*h;
     for(size_t i=w*h; i>0; i--, in++, red++) {
-        float v = a * *in + b;
-        if(0<=v && v<=255.0f) {
+        if((float)dMin<=*in && *in<=(float)dMax) {
+            float v = a * *in + b +0.5f;
+            if(v<0) v=0;
+            if(v>255) v=255;
             *red = static_cast<unsigned char>(v);
             *green++ = *red;
             *blue++  = *red;

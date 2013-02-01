@@ -88,31 +88,28 @@ int main(int argc, char *argv[])
     Image im2(pix2, width, height);
 
     // Set disparity range
-    int dispMin, dispMax;
-    if(! ((std::istringstream(argv[3])>>dispMin).eof() &&
-          (std::istringstream(argv[4])>>dispMax).eof())) {
+    int dMin, dMax;
+    if(! ((std::istringstream(argv[3])>>dMin).eof() &&
+          (std::istringstream(argv[4])>>dMax).eof())) {
         std::cerr << "Error reading dMin or dMax" << std::endl;
         return 1;
     }
-    if(dispMin>dispMax) {
-        std::cerr << "Wrong disparity range! (dispMin > dispMax)" << std::endl;
+    if(dMin>dMax) {
+        std::cerr << "Wrong disparity range! (dMin > dMax)" << std::endl;
         return 1;
     }
 
-    float a=(grayMax-grayMin)/float(dispMax-dispMin);
-    float b=(grayMax*dispMin-grayMin*dispMax)/float(dispMax-dispMin);
-
-    Image disparity = filter_cost_volume(im1, im2, dispMin, dispMax, paramCV);
-    if(! save_disparity(OUTFILE1, disparity, a,b)) {
+    Image disparity = filter_cost_volume(im1, im2, dMin, dMax, paramCV);
+    if(! save_disparity(OUTFILE1, disparity, dMin,dMax, grayMin,grayMax)) {
         std::cerr << "Error writing file " << OUTFILE1 << std::endl;
         return 1;
     }
 
     if(detectOcc) {
         std::cout << "Detect occlusions...";
-        Image disparity2= filter_cost_volume(im2,im1,-dispMax,-dispMin,paramCV);
-        detect_occlusion(disparity, disparity2, dispMin-1);
-        if(! save_disparity(OUTFILE2, disparity, a,b))  {
+        Image disparity2= filter_cost_volume(im2,im1,-dMax,-dMin,paramCV);
+        detect_occlusion(disparity, disparity2, dMin-1);
+        if(! save_disparity(OUTFILE2, disparity, dMin,dMax, grayMin,grayMax))  {
             std::cerr << "Error writing file " << OUTFILE2 << std::endl;
             return 1;
         }
@@ -121,16 +118,16 @@ int main(int argc, char *argv[])
     if(fillOcc) {
         std::cout << "Post-processing: fill occlusions" << std::endl;
         Image dispDense = disparity.clone();
-        dispDense.fillMaxX(dispMin);
-        if(! save_disparity(OUTFILE3, dispDense, a,b)) {
+        dispDense.fillMaxX(dMin);
+        if(! save_disparity(OUTFILE3, dispDense, dMin,dMax, grayMin,grayMax)) {
             std::cerr << "Error writing file " << OUTFILE3 << std::endl;
             return 1;
         }
 
         std::cout << "Post-processing: smooth the disparity map" << std::endl;
         fill_occlusion(dispDense, im1.medianColor(1),
-                       disparity, dispMin, dispMax, paramOcc);
-        if(! save_disparity(OUTFILE4, disparity, a,b)) {
+                       disparity, dMin, dMax, paramOcc);
+        if(! save_disparity(OUTFILE4, disparity, dMin,dMax, grayMin,grayMax)) {
             std::cerr << "Error writing file " << OUTFILE4 << std::endl;
             return 1;
         }
