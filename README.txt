@@ -17,7 +17,7 @@ Cost-volume filtering parameters:
     -G tau2: max for gradient difference (2)
 
 Occlusion detection:
-    -o: detect occlusion
+    -o tolDiffDisp: tolerance for left-right disp. diff. (0)
 
 Densification:
     -O: fill occlusion and launch the post-processing

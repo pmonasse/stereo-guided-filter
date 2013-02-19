@@ -1,3 +1,23 @@
+/**
+ * @file main.cpp
+ * @brief Disparity map estimation through cost-volume filtering
+ * @author Pauline Tan <pauline.tan@ens-cachan.fr>
+ *         Pascal Monasse <monasse@imagine.enpc.fr>
+ * 
+ * Copyright (c) 2012-2013, Pauline Tan, Pascal Monasse
+ * All rights reserved.
+ * 
+ * This program is free software: you can redistribute it and/or modify it
+ * under, at your option, the terms of the GNU General Public License as 
+ * published by the Free Software Foundation, either version 3 of the 
+ * License, or (at your option) any later version, or the terms of the 
+ * simplified BSD license.
+ *
+ * You should have received a copy of these licenses along with this program.
+ * If not, see <http://www.gnu.org/licenses/> and
+ * <http://www.opensource.org/licenses/bsd-license.html>.
+ */
+
 #include "costVolume.h"
 #include "occlusion.h"
 #include "image.h"
@@ -12,7 +32,7 @@ static const char* OUTFILE3="disparity_occlusion_filled.png";
 static const char* OUTFILE4="disparity_occlusion_filled_smoothed.png";
 
 static void usage(const char* name) {
-    ParamCVFilter p;
+    ParamGuidedFilter p;
     ParamOcclusion q;
     std::cerr << "Fast Cost-Volume Filtering for Visual Correspondence\n"
               << "Usage: " << name << " [options] im1.png im2.png dmin dmax\n\n"
@@ -25,9 +45,10 @@ static void usage(const char* name) {
               << "    -C tau1: max for color difference ("
               <<p.color_threshold<<")\n"
               << "    -G tau2: max for gradient difference ("
-              <<p.gradient_threshold<<")\n\n"
+              <<p.gradient_threshold << ")\n\n"
               << "Occlusion detection:\n"
-              << "    -o: detect occlusion\n\n"
+              << "    -o tolDiffDisp: tolerance for left-right disp. diff. ("
+              <<q.tol_disp << ")\n\n"
               << "Densification:\n"
               << "    -O: fill occlusion and launch the post-processing\n"
               << "    -r radius: radius of the weighted median filter ("
@@ -46,15 +67,15 @@ int main(int argc, char *argv[])
     int grayMin=255, grayMax=0;
     CmdLine cmd;
 
-    ParamCVFilter paramCV; // Parameters for cost-volume filtering
-    cmd.add( make_option('R',paramCV.kernel_radius) );
-    cmd.add( make_option('A',paramCV.alpha) );
-    cmd.add( make_option('E',paramCV.epsilon) );
-    cmd.add( make_option('C',paramCV.color_threshold) );
-    cmd.add( make_option('G',paramCV.gradient_threshold) );
+    ParamGuidedFilter paramGF; // Parameters for cost-volume filtering
+    cmd.add( make_option('R',paramGF.kernel_radius) );
+    cmd.add( make_option('A',paramGF.alpha) );
+    cmd.add( make_option('E',paramGF.epsilon) );
+    cmd.add( make_option('C',paramGF.color_threshold) );
+    cmd.add( make_option('G',paramGF.gradient_threshold) );
 
     ParamOcclusion paramOcc; // Parameters for filling occlusions
-    cmd.add( make_switch('o') ); // Detect occlusion
+    cmd.add( make_option('o',paramOcc.tol_disp) ); // Detect occlusion
     cmd.add( make_switch('O') ); // Fill occlusion
     cmd.add( make_option('r',paramOcc.median_radius) );
     cmd.add( make_option('c',paramOcc.sigma_color) );
@@ -99,7 +120,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    Image disparity = filter_cost_volume(im1, im2, dMin, dMax, paramCV);
+    Image disparity = filter_cost_volume(im1, im2, dMin, dMax, paramGF);
     if(! save_disparity(OUTFILE1, disparity, dMin,dMax, grayMin,grayMax)) {
         std::cerr << "Error writing file " << OUTFILE1 << std::endl;
         return 1;
@@ -107,8 +128,8 @@ int main(int argc, char *argv[])
 
     if(detectOcc) {
         std::cout << "Detect occlusions...";
-        Image disparity2= filter_cost_volume(im2,im1,-dMax,-dMin,paramCV);
-        detect_occlusion(disparity, disparity2, dMin-1);
+        Image disparity2= filter_cost_volume(im2,im1,-dMax,-dMin,paramGF);
+        detect_occlusion(disparity, disparity2, dMin-1, paramOcc.tol_disp);
         if(! save_disparity(OUTFILE2, disparity, dMin,dMax, grayMin,grayMax))  {
             std::cerr << "Error writing file " << OUTFILE2 << std::endl;
             return 1;

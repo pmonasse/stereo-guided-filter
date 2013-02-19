@@ -1,16 +1,36 @@
+/**
+ * @file occlusion.cpp
+ * @brief Detect and fill occlusions by left-right consistency
+ * @author Pauline Tan <pauline.tan@ens-cachan.fr>
+ *         Pascal Monasse <monasse@imagine.enpc.fr>
+ * 
+ * Copyright (c) 2012-2013, Pauline Tan, Pascal Monasse
+ * All rights reserved.
+ * 
+ * This program is free software: you can redistribute it and/or modify it
+ * under, at your option, the terms of the GNU General Public License as 
+ * published by the Free Software Foundation, either version 3 of the 
+ * License, or (at your option) any later version, or the terms of the 
+ * simplified BSD license.
+ *
+ * You should have received a copy of these licenses along with this program.
+ * If not, see <http://www.gnu.org/licenses/> and
+ * <http://www.opensource.org/licenses/bsd-license.html>.
+ */
+
 #include "occlusion.h"
 #include "image.h"
+#include <cstdlib>
 
 /// Detect left-right discrepancies in disparity and put incoherent pixels to
 /// value \a dOcclusion in \a disparityLeft.
 void detect_occlusion(Image& disparityLeft, const Image& disparityRight,
-                      int dOcclusion) {
+                      int dOcclusion, int tolDisp) {
     const int w=disparityLeft.width(), h=disparityLeft.height();
     for(int y=0; y<h; y++)
         for(int x=0; x<w; x++) {
             int d = (int)disparityLeft(x,y);
-            if(x+d<0 || x+d>=w ||
-               disparityLeft(x,y) != -disparityRight(x+d,y))
+            if(x+d<0 || x+d>=w || abs(d+(int)disparityRight(x+d,y))>tolDisp)
                 disparityLeft(x,y) = dOcclusion;
         }
 }

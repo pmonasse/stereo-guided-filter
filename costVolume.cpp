@@ -1,3 +1,23 @@
+/**
+ * @file costVolume.cpp
+ * @brief Disparity cost volume filtering by guided filter
+ * @author Pauline Tan <pauline.tan@ens-cachan.fr>
+ *         Pascal Monasse <monasse@imagine.enpc.fr>
+ * 
+ * Copyright (c) 2012-2013, Pauline Tan, Pascal Monasse
+ * All rights reserved.
+ * 
+ * This program is free software: you can redistribute it and/or modify it
+ * under, at your option, the terms of the GNU General Public License as 
+ * published by the Free Software Foundation, either version 3 of the 
+ * License, or (at your option) any later version, or the terms of the 
+ * simplified BSD license.
+ *
+ * You should have received a copy of these licenses along with this program.
+ * If not, see <http://www.gnu.org/licenses/> and
+ * <http://www.opensource.org/licenses/bsd-license.html>.
+ */
+
 #include "costVolume.h"
 #include "image.h"
 #include "io_png.h"
@@ -35,7 +55,7 @@ static Image covariance(Image im1, Image mean1, Image im2, Image mean2, int r) {
 static void compute_cost(Image im1R, Image im1G, Image im1B,
                          Image im2R, Image im2G, Image im2B,
                          Image gradient1, Image gradient2,
-                         int d, const ParamCVFilter& param,
+                         int d, const ParamGuidedFilter& param,
                          Image& cost) {
     const int width=im1R.width(), height=im1R.height();
     for(int y=0; y<height; y++)
@@ -46,23 +66,23 @@ static void compute_cost(Image im1R, Image im1G, Image im1B,
                 float col1[3] = {im1R(x,y), im1G(x,y), im1B(x,y)};
                 float col2[3] = {im2R(x+d,y), im2G(x+d,y), im2B(x+d,y)};
                 costColor=0;
-                for(int i=0; i<3; i++) {
+                for(int i=0; i<3; i++) { // Eq. (2)
                     float tmp = col1[i]-col2[i];
                     if(tmp<0) tmp=-tmp;
                     costColor += tmp;
                 }
                 costColor /= 3;
-                if(costColor > param.color_threshold) 
+                if(costColor > param.color_threshold) // Eq. (3)
                     costColor = param.color_threshold;
 
-                costGradient = gradient1(x,y)-gradient2(x+d,y);
+                costGradient = gradient1(x,y)-gradient2(x+d,y); // Eq. (5)
                 if(costGradient < 0)
                     costGradient = -costGradient;
-                if(costGradient > param.gradient_threshold) 
+                if(costGradient > param.gradient_threshold) // Eq. (6)
                     costGradient = param.gradient_threshold;
             }
 
-            // Combination of the two penalties
+            // Combination of the two penalties, eq. (7)
             cost(x,y) = (1-param.alpha)*costColor + param.alpha*costGradient;
         }
 }
@@ -70,7 +90,7 @@ static void compute_cost(Image im1R, Image im1G, Image im1B,
 /// Cost volume filtering
 Image filter_cost_volume(Image im1Color, Image im2Color,
                          int dispMin, int dispMax,
-                         const ParamCVFilter& param) {
+                         const ParamGuidedFilter& param) {
     Image im1R=im1Color.r(), im1G=im1Color.g(), im1B=im1Color.b();
     Image im2R=im2Color.r(), im2G=im2Color.g(), im2B=im2Color.b();
     const int width=im1R.width(), height=im1R.height();
@@ -89,7 +109,7 @@ Image filter_cost_volume(Image im1Color, Image im2Color,
     Image gradient1 = im1Gray.gradX();
     Image gradient2 = im2Gray.gradX();
 
-    // Compute the mean and variance of each patch
+    // Compute the mean and variance of each patch, eq. (14)
     Image meanIm1R = im1R.boxFilter(r);
     Image meanIm1G = im1G.boxFilter(r);
     Image meanIm1B = im1B.boxFilter(r);
@@ -107,7 +127,7 @@ Image filter_cost_volume(Image im1Color, Image im2Color,
         std::cout << '*' << std::flush;
         compute_cost(im1R,im1G,im1B, im2R,im2G,im2B, gradient1, gradient2,
                      d, param, dCost);
-        Image meanCost = dCost.boxFilter(r);
+        Image meanCost = dCost.boxFilter(r); // Eq. (14)
 
         Image covarIm1RCost = covariance(im1R, meanIm1R, dCost, meanCost, r);
         Image covarIm1GCost = covariance(im1G, meanIm1G, dCost, meanCost, r);
@@ -115,13 +135,13 @@ Image filter_cost_volume(Image im1Color, Image im2Color,
 
         for(int y=0; y<height; y++)
             for(int x=0; x<width; x++) {
-                float S1[3*3] = {
+                float S1[3*3] = { // Eq. (21)
                     varIm1RR(x,y)+param.epsilon, varIm1RG(x,y), varIm1RB(x,y),
                     varIm1RG(x,y), varIm1GG(x,y)+param.epsilon, varIm1GB(x,y),
                     varIm1RB(x,y), varIm1GB(x,y), varIm1BB(x,y)+param.epsilon };
                 float S2[3*3];
                 inverseSym3(S1, S2);
-
+                // Eq. (19)
                 aR(x,y) = covarIm1RCost(x,y) * S2[0] +
                           covarIm1GCost(x,y) * S2[1] +
                           covarIm1BCost(x,y) * S2[2];
