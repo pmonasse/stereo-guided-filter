@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     bool detectOcc = cmd.used('o') || cmd.used('O');
     bool fillOcc = cmd.used('O');
 
-    // Load images and convert to grayscale
+    // Load images
     size_t width, height, width2, height2;
     float* pix1 = io_png_read_f32_rgb(argv[1], &width, &height);
     float* pix2 = io_png_read_f32_rgb(argv[2], &width2, &height2);
