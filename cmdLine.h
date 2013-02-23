@@ -98,8 +98,8 @@ public:
             param=std::string(argv[0]).substr(size); arg=1;
         }
         if(arg>0) {
-            std::stringstream str(param);
-            if((str >> _field).fail() || !str.eof())
+            std::stringstream str(param); char unused;
+            if((str >> _field).fail() || !(str>>unused).fail())
                 throw std::string("Unable to interpret ")
                     +param+" as argument of "+argv[0];
             used = true;

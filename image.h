@@ -57,6 +57,8 @@ public:
 
     // Filters
     Image gradX() const;
+    void fillX(float vMin, const float& (*cmp)(const float&,const float&));
+    void fillMinX(float vMin);
     void fillMaxX(float vMin);
     Image boxFilter(int radius) const;
     void median(int radius, Image& M) const;

@@ -20,13 +20,17 @@ Occlusion detection:
     -o tolDiffDisp: tolerance for left-right disp. diff. (0)
 
 Densification:
-    -O: fill occlusion and launch the post-processing
+    -O sense: fill occlusion, sense='r':right,'l':left
     -r radius: radius of the weighted median filter (19)
     -c sigmac: value of sigma_color (25.5)
     -s sigmas: value of sigma_space (9)
 
     -a grayMin: value of gray for min disparity (255)
     -b grayMax: value of gray for max disparity (0)
+
+The parameter 'sense' used in densification is the direction of camera motion:
+    - from left to right (value 'r'), common for Middlebury pairs
+    - from right to left (value 'l')
 
 - Output image files
 disparity.png: disparity map after cost-volume filtering

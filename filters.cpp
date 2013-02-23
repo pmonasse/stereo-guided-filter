@@ -24,9 +24,10 @@
 #include <cmath>
 #include <cassert>
 
-/// Fill pixels below value \a vMin with max of values at closest pixels on same
+/// Fill pixels below value \a vMin using values at two closest pixels on same
 /// line above \a vMin.
-void Image::fillMaxX(float vMin) {
+/// The filling value is the result of \a cmp with the two values as parameters.
+void Image::fillX(float vMin, const float& (*cmp)(const float&,const float&)) {
     for(int y=0; y<h; y++) {
         int x0=-1;
         float v0 = vMin;
@@ -35,11 +36,23 @@ void Image::fillMaxX(float vMin) {
             while(x1<w && (*this)(x1,y)<vMin) ++x1;
             float v=v0;
             if(x1<w)
-                v = std::max(v,v0=(*this)(x1,y));
+                v = cmp(v,v0=(*this)(x1,y));
             std::fill(&(*this)(x0+1,y), &(*this)(x1,y), v);
             x0=x1;
         }
     }
+}
+
+/// Fill pixels below value \a vMin with min of values at closest pixels on same
+/// line above \a vMin.
+void Image::fillMinX(float vMin) {
+    fillX(vMin, std::min<float>);
+}
+
+/// Fill pixels below value \a vMin with max of values at closest pixels on same
+/// line above \a vMin.
+void Image::fillMaxX(float vMin) {
+    fillX(vMin, std::max<float>);
 }
 
 /// Derivative along x-axis

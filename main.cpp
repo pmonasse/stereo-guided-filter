@@ -50,7 +50,7 @@ static void usage(const char* name) {
               << "    -o tolDiffDisp: tolerance for left-right disp. diff. ("
               <<q.tol_disp << ")\n\n"
               << "Densification:\n"
-              << "    -O: fill occlusion and launch the post-processing\n"
+              << "    -O sense: fill occlusion, sense='r':right, 'l':left\n"
               << "    -r radius: radius of the weighted median filter ("
               <<q.median_radius << ")\n"
               << "    -c sigmac: value of sigma_color ("
@@ -65,6 +65,7 @@ static void usage(const char* name) {
 int main(int argc, char *argv[])
 {
     int grayMin=255, grayMax=0;
+    char sense='r'; // Camera motion direction: 'r'=to-right, 'l'=to-left
     CmdLine cmd;
 
     ParamGuidedFilter paramGF; // Parameters for cost-volume filtering
@@ -76,7 +77,7 @@ int main(int argc, char *argv[])
 
     ParamOcclusion paramOcc; // Parameters for filling occlusions
     cmd.add( make_option('o',paramOcc.tol_disp) ); // Detect occlusion
-    cmd.add( make_switch('O') ); // Fill occlusion
+    cmd.add( make_option('O',sense) ); // Fill occlusion
     cmd.add( make_option('r',paramOcc.median_radius) );
     cmd.add( make_option('c',paramOcc.sigma_color) );
     cmd.add( make_option('s',paramOcc.sigma_space) );
@@ -96,6 +97,12 @@ int main(int argc, char *argv[])
     }
     bool detectOcc = cmd.used('o') || cmd.used('O');
     bool fillOcc = cmd.used('O');
+
+    if(sense != 'r' && sense != 'l') {
+        std::cerr << "Error: invalid camera motion direction " << sense
+                  << " (must be r or l)" << std::endl;
+        return 1;
+    }
 
     // Load images
     size_t width, height, width2, height2;
@@ -139,7 +146,10 @@ int main(int argc, char *argv[])
     if(fillOcc) {
         std::cout << "Post-processing: fill occlusions" << std::endl;
         Image dispDense = disparity.clone();
-        dispDense.fillMaxX(dMin);
+        if(sense == 'r')
+            dispDense.fillMaxX(dMin);
+        else
+            dispDense.fillMinX(dMin);
         if(! save_disparity(OUTFILE3, dispDense, dMin,dMax, grayMin,grayMax)) {
             std::cerr << "Error writing file " << OUTFILE3 << std::endl;
             return 1;
