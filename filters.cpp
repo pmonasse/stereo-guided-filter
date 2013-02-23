@@ -20,13 +20,14 @@
 
 #include "image.h"
 #include <algorithm>
+#include <numeric>
 #include <vector>
 #include <cmath>
 #include <cassert>
 
 /// Fill pixels below value \a vMin using values at two closest pixels on same
-/// line above \a vMin.
-/// The filling value is the result of \a cmp with the two values as parameters.
+/// line above \a vMin. The filling value is the result of \a cmp with the two
+/// values as parameters.
 void Image::fillX(float vMin, const float& (*cmp)(const float&,const float&)) {
     for(int y=0; y<h; y++) {
         int x0=-1;
@@ -150,6 +151,36 @@ float Image::dist2Color(int x1,int y1, int x2,int y2) const {
         sqr((*this)(x1,y1+2*h)-(*this)(x2,y2+2*h));
 }
 
+/// @brief Compute weighted histogram of image values.
+///
+/// The area is [x-radius,x+radius]x[y-radius,y+radius] (inter image).
+/// Values are shifted by \a vMin.
+/// Weights are computed from the \a guidance image with factors \a sSpace for
+/// spatial distance and \a sColor for color distance to central pixel.
+void Image::weighted_histo(std::vector<float>& tab, int x, int y, int radius,
+                           float vMin, const Image& guidance,
+                           float sSpace, float sColor) const {
+    std::fill(tab.begin(), tab.end(), 0);
+    for(int dy=-radius; dy<=radius; dy++)
+        if(0<=y+dy && y+dy<h)
+            for(int dx=-radius; dx<=radius; dx++)
+                if(0<=x+dx && x+dx<w) {
+                    float w =
+                        exp(-(dx*dx+dy*dy)*sSpace
+                            -guidance.dist2Color(x,y,x+dx,y+dy)*sColor);
+                    tab[(int)((*this)(x+dx,y+dy))-vMin] += w;
+                }
+}
+
+/// Index in histogram \a tab reaching median.
+static int median_histo(const std::vector<float>& tab) {
+    float sum=std::accumulate(tab.begin(), tab.end(), 0)/2;
+    int d=-1;
+    for(float cumul=0; cumul<sum;)
+        cumul += tab[++d];
+    return d;
+}
+
 /// @brief Weighted median filter of current image.
 ///
 /// Image is assumed to have integer values in [vMin,vMax]. Weight are computed
@@ -175,25 +206,8 @@ Image Image::weightedMedianColor(const Image& guidance,
                 M(x,y)=(*this)(x,y);
                 continue;
             }
-            std::fill(tab.begin(), tab.end(), 0);
-
-            float sum=0;
-            for(int dy=-radius; dy<=radius; dy++)
-                if(0<=y+dy && y+dy<h)
-                    for(int dx=-radius; dx<=radius; dx++)
-                        if(0<=x+dx && x+dx<w) {
-                            float w =
-                                exp(-(dx*dx+dy*dy)*sSpace
-                                    -guidance.dist2Color(x,y,x+dx,y+dy)*sColor);
-                            tab[(int)((*this)(x+dx,y+dy))-vMin] += w;
-                            sum += w;
-                        }
-            int d=-1;
-            float cumul=0;
-            sum /= 2;
-            while(cumul<sum)
-                cumul += tab[++d];
-            M(x,y) = vMin+d;
+            weighted_histo(tab, x,y, radius, vMin, guidance, sSpace, sColor);
+            M(x,y) = vMin+median_histo(tab);
         }
     return M;
 }

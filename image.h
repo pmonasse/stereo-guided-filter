@@ -20,6 +20,8 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
+#include <vector>
+
 /// Float image class, with shallow copy for performance.
 ///
 /// Copy constructor and operator= perform a shallow copy, so pixels are shared.
@@ -57,7 +59,6 @@ public:
 
     // Filters
     Image gradX() const;
-    void fillX(float vMin, const float& (*cmp)(const float&,const float&));
     void fillMinX(float vMin);
     void fillMaxX(float vMin);
     Image boxFilter(int radius) const;
@@ -67,6 +68,11 @@ public:
                               const Image& where, int vMin, int vMax,
                               int radius,
                               float sigmaSpace, float sigmaColor) const;
+private:
+    void fillX(float vMin, const float& (*cmp)(const float&,const float&));
+    void weighted_histo(std::vector<float>& tab, int x, int y, int radius,
+                        float vMin, const Image& guidance,
+                        float sSpace, float sColor) const;
 };
 
 bool save_disparity(const char* file_name, const Image& disparity,
