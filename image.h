@@ -33,7 +33,6 @@ class Image {
     int* count;
     float* tab;
     int w, h;
-    float dist2Color(int x1,int y1, int x2,int y2) const;
     void kill();
 public:
     Image(int width, int height);
@@ -57,7 +56,7 @@ public:
     Image operator*(const Image& I) const;
     Image& operator+=(const Image& I);
 
-    // Filters
+    // Filters (implemented in filters.cpp)
     Image gradX() const;
     void fillMinX(float vMin);
     void fillMaxX(float vMin);
@@ -70,6 +69,7 @@ public:
                               float sigmaSpace, float sigmaColor) const;
 private:
     void fillX(float vMin, const float& (*cmp)(const float&,const float&));
+    float dist2Color(int x1,int y1, int x2,int y2) const;
     void weighted_histo(std::vector<float>& tab, int x, int y, int radius,
                         float vMin, const Image& guidance,
                         float sSpace, float sColor) const;

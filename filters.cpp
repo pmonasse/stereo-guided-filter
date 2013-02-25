@@ -147,8 +147,8 @@ inline float sqr(float v1) {
 /// Square L2 distance between colors at (x1,y1) and at (x2,y2)
 float Image::dist2Color(int x1,int y1, int x2,int y2) const {
     return sqr((*this)(x1,y1    )-(*this)(x2,y2    ))+
-        sqr((*this)(x1,y1+  h)-(*this)(x2,y2+  h))+
-        sqr((*this)(x1,y1+2*h)-(*this)(x2,y2+2*h));
+           sqr((*this)(x1,y1+  h)-(*this)(x2,y2+  h))+
+           sqr((*this)(x1,y1+2*h)-(*this)(x2,y2+2*h));
 }
 
 /// @brief Compute weighted histogram of image values.
