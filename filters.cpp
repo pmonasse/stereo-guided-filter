@@ -174,7 +174,7 @@ void Image::weighted_histo(std::vector<float>& tab, int x, int y, int radius,
 
 /// Index in histogram \a tab reaching median.
 static int median_histo(const std::vector<float>& tab) {
-    float sum=std::accumulate(tab.begin(), tab.end(), 0)/2;
+    float sum=std::accumulate(tab.begin(), tab.end(), 0.0f)/2;
     int d=-1;
     for(float cumul=0; cumul<sum;)
         cumul += tab[++d];
