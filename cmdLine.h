@@ -73,7 +73,7 @@ public:
     }
 };
 
-/// Option with an argument of type T. The type must be readable by operator>>
+/// Option with an argument of type T, which must be readable by operator>>
 template <class T>
 class OptionField : public Option {
 public:
@@ -163,7 +163,7 @@ public:
                     break;
                 }
             }
-            if(! found) { // A single dash and a negative number are not options
+            if(! found) { // A negative number is not an option
                 if(std::string(argv[i]).size()>1 && argv[i][0] == '-') {
                     std::istringstream str(argv[i]);
                     float v;
