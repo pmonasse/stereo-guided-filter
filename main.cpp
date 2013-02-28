@@ -34,7 +34,7 @@ static const char* OUTFILE4="disparity_occlusion_filled_smoothed.png";
 static void usage(const char* name) {
     ParamGuidedFilter p;
     ParamOcclusion q;
-    std::cerr << "Fast Cost-Volume Filtering for Visual Correspondence\n"
+    std::cerr <<"Stereo Disparity through Cost Aggregation with Guided Filter\n"
               << "Usage: " << name << " [options] im1.png im2.png dmin dmax\n\n"
               << "Options (default values in parentheses)\n"
               << "Cost-volume filtering parameters:\n"
