@@ -1,4 +1,7 @@
-Fast Cost-Volume Filtering for Visual Correspondence
+Stereo Disparity through Cost Aggregation with Guided Filter
+Pauline Tan, <pauline.tan@ens-cachan.fr>, CMLA, ENS Cachan, France
+Pascal Monasse, <monasse@imagine.enpc.fr>, LIGM, Univ. Paris-Est, France
+Version 20130301
 
 - Build
 mkdir Build && cd Build
@@ -37,3 +40,7 @@ disparity.png: disparity map after cost-volume filtering
 disparity_occlusion.png: after left-right check
 disparity_occlusion_filled.png: simple densification
 disparity_occlusion_filled_smoothed.png: final densification with median filter
+
+- Test
+./costVolumeFilter -O r ../tsukuba0.png ../tsukuba1.png -15 0
+Compare resulting image files with those in folder data.

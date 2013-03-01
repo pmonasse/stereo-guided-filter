@@ -28,8 +28,17 @@ IF(UNIX)
     ENDIF(OPENMP_FOUND)
 ENDIF(UNIX)
 
+SET(DATA
+    data/tsukuba0.png data/tsukuba1.png
+    data/disparity.png
+    data/disparity_occlusion.png
+    data/disparity_occlusion_filled.png
+    data/disparity_occlusion_filled_smoothed.png)
+
 SET(CPACK_PACKAGE_FILE_NAME "CostVolumeFilter")
 SET(CPACK_GENERATOR "TGZ")
 INCLUDE(CPack)
-INSTALL(FILES CMakeLists.txt ${SRC} README.txt tsukuba0.png tsukuba1.png
+INSTALL(FILES CMakeLists.txt ${SRC} README.txt license.txt
         DESTINATION .)
+INSTALL(FILES ${DATA}
+        DESTINATION ./data)
