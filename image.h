@@ -23,7 +23,6 @@
 /// Float image class, with shallow copy for performance.
 ///
 /// Copy constructor and operator= perform a shallow copy, so pixels are shared.
-/// To perform a deep copy, use method clone().
 /// There is a constructor taking array of pixels; no copy is done, make sure
 /// the array exists during the lifetime of the image.
 /// The methods using color image assume consecutive channels (no interlace).
@@ -38,7 +37,6 @@ public:
     Image(const Image& I);
     ~Image() { kill(); }
     Image& operator=(const Image& I);
-    Image clone() const;
 
     int width() const { return w; }
     int height() const { return h; }

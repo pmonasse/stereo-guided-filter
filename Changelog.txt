@@ -1,0 +1,5 @@
+1.0-rc2:
+- Fix precision loss for large image in boxFilter
+
+1.0-rc1:
+- Initial release

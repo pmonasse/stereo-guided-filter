@@ -69,18 +69,23 @@ Image Image::gradX() const {
     return D;
 }
 
-/// Averaging filter with box of \a radius
+/// Averaging filter with box of \a radius.
+///
+/// Use the integral image for fast computation. The integral image is of type
+/// double to mitigate risks of precision loss for large images.
 Image Image::boxFilter(int radius) const {
-    Image S(clone());
+    double* S = new double[w*h]; // Use double to mitigate precision loss
+    for(int i=w*h-1; i>=0; i--)
+        S[i] = static_cast<double>(tab[i]);
 
     //cumulative sum table S, eq. (24)
     for(int y=0; y<h; y++) { //horizontal
-        float *in=S.tab+y*w, *out=in+1;
+        double *in=S+y*w, *out=in+1;
         for(int x=1; x<w; x++)
             *out++ += *in++;
     }
     for(int y=1; y<h; y++) { //vertical
-        float *in=S.tab+(y-1)*w, *out=in+w;
+        double *in=S+(y-1)*w, *out=in+w;
         for(int x=0; x<w; x++)
             *out++ += *in++;
     }
@@ -95,16 +100,17 @@ Image Image::boxFilter(int radius) const {
             int xmin = std::max(-1, x-radius-1);
             int xmax = std::min(w-1, x+radius);
             // S(xmax,ymax)-S(xmin,ymax)-S(xmax,ymin)+S(xmin,ymin), eq. (25)
-            *out = S(xmax,ymax);
+            double val = S[ymax*w+xmax];
             if(xmin>=0)
-                *out -= S(xmin,ymax);
+                val -= S[ymax*w+xmin];
             if(ymin>=0)
-                *out -= S(xmax,ymin);
+                val -= S[ymin*w+xmax];
             if(xmin>=0 && ymin>=0)
-                *out += S(xmin,ymin);
-            *out /= (xmax-xmin)*(ymax-ymin); //average
+                val += S[ymin*w+xmin];
+            *out = static_cast<float>(val/((xmax-xmin)*(ymax-ymin))); //average
         }
     }
+    delete [] S;
     return B;
 }
 

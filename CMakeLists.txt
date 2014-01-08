@@ -39,7 +39,7 @@ SET(DATA
     data/disparity_occlusion_filled.png
     data/disparity_occlusion_filled_smoothed.png)
 
-SET(CPACK_PACKAGE_FILE_NAME "CostVolumeFilter")
+SET(CPACK_PACKAGE_FILE_NAME "CostVolumeFilter-1.0")
 SET(CPACK_GENERATOR "TGZ")
 INCLUDE(CPack)
 INSTALL(FILES CMakeLists.txt ${SRC} ${SRC_C} README.txt license.txt
