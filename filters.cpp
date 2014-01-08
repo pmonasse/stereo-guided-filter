@@ -61,33 +61,32 @@ Image Image::gradX() const {
     float* out=D.tab;
     for(int y=0; y<h; y++) {
         const float* in=tab+y*w;
-        *out++ = in[1]-in[0];
+        *out++ = in[1]-in[0];           // Right - current
         for(int x=1; x+1<w; x++, in++)
-            *out++ = .5f*(in[2]-in[0]);
-        *out++ = in[1]-in[0];
+            *out++ = .5f*(in[2]-in[0]); // Right - left
+        *out++ = in[1]-in[0];           // Current - left
     }
     return D;
 }
 
 /// Averaging filter with box of \a radius
 Image Image::boxFilter(int radius) const {
-    Image tmp(clone());
+    Image S(clone());
 
-    //cumulative sum table
+    //cumulative sum table S, eq. (24)
     for(int y=0; y<h; y++) { //horizontal
-        float *in=tmp.tab+y*w, *out=in+1;
+        float *in=S.tab+y*w, *out=in+1;
         for(int x=1; x<w; x++)
             *out++ += *in++;
     }
     for(int y=1; y<h; y++) { //vertical
-        float *in=tmp.tab+(y-1)*w, *out=in+w;
+        float *in=S.tab+(y-1)*w, *out=in+w;
         for(int x=0; x<w; x++)
             *out++ += *in++;
     }
 
-    //box filter
+    //box filtered image B
     Image B(w,h);
-    //cumulative sum table
     float *out=B.tab;
     for(int y=0; y<h; y++) {
         int ymin = std::max(-1, y-radius-1);
@@ -95,14 +94,15 @@ Image Image::boxFilter(int radius) const {
         for(int x=0; x<w; x++, out++) {
             int xmin = std::max(-1, x-radius-1);
             int xmax = std::min(w-1, x+radius);
-            *out = tmp(xmax,ymax);
+            // S(xmax,ymax)-S(xmin,ymax)-S(xmax,ymin)+S(xmin,ymin), eq. (25)
+            *out = S(xmax,ymax);
             if(xmin>=0)
-                *out -= tmp(xmin,ymax);
+                *out -= S(xmin,ymax);
             if(ymin>=0)
-                *out -= tmp(xmax,ymin);
+                *out -= S(xmax,ymin);
             if(xmin>=0 && ymin>=0)
-                *out += tmp(xmin,ymin);
-            *out /= (xmax-xmin)*(ymax-ymin);
+                *out += S(xmin,ymin);
+            *out /= (xmax-xmin)*(ymax-ymin); //average
         }
     }
     return B;

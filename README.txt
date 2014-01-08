@@ -1,9 +1,17 @@
 Stereo Disparity through Cost Aggregation with Guided Filter
 Pauline Tan, <pauline.tan@ens-cachan.fr>, CMLA, ENS Cachan, France
 Pascal Monasse, <monasse@imagine.enpc.fr>, LIGM, Univ. Paris-Est, France
-Version 20130301
+Version 1.0-rc1 released on 2014/01/08
+Future releases and updates:
+https://github.com/pmonasse/cost-volume-filter.git
+
+- Requirements
+libpng along with its header files for image I/O
+(http://www.libpng.org/pub/png/libpng.html)
+CMake for the build system (http://www.cmake.org/)
 
 - Build
+cd CostVolumeFilter
 mkdir Build && cd Build
 cmake -D CMAKE_BUILD_TYPE:string=Release ..
 make
@@ -42,5 +50,5 @@ disparity_occlusion_filled.png: simple densification
 disparity_occlusion_filled_smoothed.png: final densification with median filter
 
 - Test
-./costVolumeFilter -O r ../tsukuba0.png ../tsukuba1.png -15 0
+./costVolumeFilter -O r ../data/tsukuba0.png ../data/tsukuba1.png -15 0
 Compare resulting image files with those in folder data.

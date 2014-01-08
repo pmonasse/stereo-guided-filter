@@ -41,9 +41,44 @@ static void inverseSym3(const float* matrix, float* inverse) {
     inverse[8] = (matrix[0]*matrix[4] - matrix[1]*matrix[3]) * det;
 }
 
-/// Covariance of patches of radius \a r between images.
+/// Covariance of patches of radius \a r between images, eq. (14).
 static Image covariance(Image im1, Image mean1, Image im2, Image mean2, int r) {
     return (im1*im2).boxFilter(r) - mean1*mean2;
+}
+
+/// Compute color cost according to eq. (3).
+///
+/// Upper-bounded (by \a maxCost) average of color absolute differences at
+/// pixels im1(x,y) and im2(x+d,y).
+inline float cost_color(Image im1R, Image im1G, Image im1B,
+                        Image im2R, Image im2G, Image im2B,
+                        int x, int y, int d, float maxCost) {
+    float col1[3] = {im1R(x,y), im1G(x,y), im1B(x,y)};
+    float col2[3] = {im2R(x+d,y), im2G(x+d,y), im2B(x+d,y)};
+    float cost=0;
+    for(int i=0; i<3; i++) { // Eq. (2)
+        float tmp = col1[i]-col2[i];
+        if(tmp<0) tmp=-tmp;
+        cost += tmp;
+    }
+    cost /= 3;
+    if(cost > maxCost) // Eq. (3)
+        cost = maxCost;
+    return cost;
+}
+
+/// Compute gradient cost according to eq. (6).
+///
+/// Upper-bounded (by \a maxCost) x-derivative difference at
+/// pixels im1(x,y) and im2(x+d,y).
+inline float cost_gradient(Image gradient1, Image gradient2,
+                           int x, int y, int d, float maxCost) {
+    float cost = gradient1(x,y)-gradient2(x+d,y); // Eq. (5)
+    if(cost < 0)
+        cost = -cost;
+    if(cost > maxCost) // Eq. (6)
+        cost = maxCost;
+    return cost;
 }
 
 /// Compute image of matching costs at disparity \a d.
@@ -59,29 +94,15 @@ static void compute_cost(Image im1R, Image im1G, Image im1B,
     for(int y=0; y<height; y++)
         for(int x=0; x<width; x++) {
             float costColor = param.color_threshold; // Color L1 distance
-            float costGradient = param.gradient_threshold; // x-deriv abs diff
+            float costGrad = param.gradient_threshold; // x-deriv abs diff
             if(0<=x+d && x+d<width) {
-                float col1[3] = {im1R(x,y), im1G(x,y), im1B(x,y)};
-                float col2[3] = {im2R(x+d,y), im2G(x+d,y), im2B(x+d,y)};
-                costColor=0;
-                for(int i=0; i<3; i++) { // Eq. (2)
-                    float tmp = col1[i]-col2[i];
-                    if(tmp<0) tmp=-tmp;
-                    costColor += tmp;
-                }
-                costColor /= 3;
-                if(costColor > param.color_threshold) // Eq. (3)
-                    costColor = param.color_threshold;
-
-                costGradient = gradient1(x,y)-gradient2(x+d,y); // Eq. (5)
-                if(costGradient < 0)
-                    costGradient = -costGradient;
-                if(costGradient > param.gradient_threshold) // Eq. (6)
-                    costGradient = param.gradient_threshold;
+                costColor = cost_color(im1R, im1G, im1B, im2R, im2G, im2B,
+                                       x, y, d, param.color_threshold);
+                costGrad = cost_gradient(gradient1, gradient2,
+                                         x, y, d, param.gradient_threshold);
             }
-
             // Combination of the two penalties, eq. (7)
-            cost(x,y) = (1-param.alpha)*costColor + param.alpha*costGradient;
+            cost(x,y) = (1-param.alpha)*costColor + param.alpha*costGrad;
         }
 }
 
@@ -133,6 +154,7 @@ Image filter_cost_volume(Image im1Color, Image im2Color,
 
         for(int y=0; y<height; y++)
             for(int x=0; x<width; x++) {
+                // Computation of (Sigma_k+\epsilon Id)^{-1}
                 float S1[3*3] = { // Eq. (21)
                     varIm1RR(x,y)+param.epsilon, varIm1RG(x,y), varIm1RB(x,y),
                     varIm1RG(x,y), varIm1GG(x,y)+param.epsilon, varIm1GB(x,y),

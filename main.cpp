@@ -106,6 +106,10 @@ int main(int argc, char *argv[])
     size_t width, height, width2, height2;
     float* pix1 = io_png_read_f32_rgb(argv[1], &width, &height);
     float* pix2 = io_png_read_f32_rgb(argv[2], &width2, &height2);
+    if(!pix1 || !pix2) {
+        std::cerr << "Cannot read image file " << argv[pix1?2:1] << std::endl;
+        return 1;
+    }
     if(width != width2 || height != height2) {
         std::cerr << "The images must have the same size!" << std::endl;
         return 1;
