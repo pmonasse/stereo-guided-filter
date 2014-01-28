@@ -1,3 +1,6 @@
+1.0-rc3:
+- Fix build after erroneous removal of method Image::clone
+
 1.0-rc2:
 - Fix precision loss for large image in boxFilter
 

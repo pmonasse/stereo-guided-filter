@@ -48,6 +48,13 @@ Image& Image::operator=(const Image& I) {
     return *this;
 }
 
+/// Deep copy
+Image Image::clone() const {
+    Image I(w,h);
+    std::copy(tab, tab+w*h, I.tab);
+    return I;
+}
+
 /// Free memory
 void Image::kill() {
     if(count && --*count == 0) {

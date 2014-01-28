@@ -1,7 +1,7 @@
 Stereo Disparity through Cost Aggregation with Guided Filter
 Pauline Tan, <pauline.tan@ens-cachan.fr>, CMLA, ENS Cachan, France
 Pascal Monasse, <monasse@imagine.enpc.fr>, LIGM, Univ. Paris-Est, France
-Version 1.0-rc2 released on 2014/01/08
+Version 1.0-rc3 released on 2014/01/28
 Future releases and updates:
 https://github.com/pmonasse/cost-volume-filter.git
 
