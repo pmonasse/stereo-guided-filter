@@ -16,6 +16,10 @@ SET(SRC
 ADD_EXECUTABLE(costVolumeFilter ${SRC} ${SRC_C})
 TARGET_LINK_LIBRARIES(costVolumeFilter ${PNG_LIBRARIES})
 
+ADD_EXECUTABLE(show_weights
+  cmdLine.h filters.cpp image.cpp image.h main_weights.cpp ${SRC_C})
+TARGET_LINK_LIBRARIES(show_weights ${PNG_LIBRARIES})
+
 FIND_PACKAGE(OpenMP)
 IF(OPENMP_FOUND)
     SET_TARGET_PROPERTIES(costVolumeFilter PROPERTIES
