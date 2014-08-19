@@ -30,6 +30,10 @@
 #include <sstream>
 #include <cassert>
 
+#ifdef _WIN32
+#pragma warning(disable:4290) // exception specification ignored...
+#endif
+
 /// Base class for option/switch
 class Option {
 public:

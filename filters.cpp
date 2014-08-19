@@ -162,9 +162,9 @@ float Image::dist2Color(int x1,int y1, int x2,int y2) const {
 /// Weights are computed from the \a guidance image with factors \a sSpace for
 /// spatial distance and \a sColor for color distance to central pixel.
 void Image::weighted_histo(std::vector<float>& tab, int x, int y, int radius,
-                           float vMin, const Image& guidance,
+                           int vMin, const Image& guidance,
                            float sSpace, float sColor) const {
-    std::fill(tab.begin(), tab.end(), 0);
+    std::fill(tab.begin(), tab.end(), 0.0f);
     for(int dy=-radius; dy<=radius; dy++)
         if(0<=y+dy && y+dy<h)
             for(int dx=-radius; dx<=radius; dx++)
@@ -211,7 +211,7 @@ Image Image::weightedMedianColor(const Image& guidance,
                 continue;
             }
             weighted_histo(tab, x,y, radius, vMin, guidance, sSpace, sColor);
-            M(x,y) = vMin+median_histo(tab);
+            M(x,y) = static_cast<float>(vMin+median_histo(tab));
         }
     return M;
 }

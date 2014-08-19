@@ -496,7 +496,7 @@ float *io_png_read_f32_gray(const char *fname, size_t * nxp, size_t * nyp)
         rgb_to_gray(img, img + *nxp * *nyp, img + 2 * *nxp * *nyp,
                     *nxp, *nyp, img);
         /* resize and return the image */
-        img = realloc(img, *nxp * *nyp * sizeof(float));
+        img = (float*)realloc(img, *nxp * *nyp * sizeof(float));
         return img;
     }
 }
@@ -674,7 +674,7 @@ static int io_png_write_raw(const char *fname, const void *data,
                 /* row loop */
                 for (i = 0; i < nx; i++) {
                     /* pixel loop */
-                    tmp = floor(*data_f32_ptr++ + .5);
+                    tmp = (float)floor(*data_f32_ptr++ + .5f);
                     *idata_ptr = (png_byte) (tmp < 0. ? 0. :
                                              (tmp > 255. ? 255. : tmp));
                     idata_ptr += nc;

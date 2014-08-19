@@ -69,7 +69,7 @@ private:
     void fillX(float vMin, const float& (*cmp)(const float&,const float&));
     float dist2Color(int x1,int y1, int x2,int y2) const;
     void weighted_histo(std::vector<float>& tab, int x, int y, int radius,
-                        float vMin, const Image& guidance,
+                        int vMin, const Image& guidance,
                         float sSpace, float sColor) const;
 };
 

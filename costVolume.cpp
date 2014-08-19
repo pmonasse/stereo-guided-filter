@@ -117,7 +117,7 @@ Image filter_cost_volume(Image im1Color, Image im2Color,
     std::cout << "Cost-volume: " << (dispMax-dispMin+1) << " disparities. ";
 
     Image disparity(width,height);
-    std::fill_n(&disparity(0,0), width*height, dispMin-1);
+    std::fill_n(&disparity(0,0), width*height, static_cast<float>(dispMin-1));
     Image cost(width,height);
     std::fill_n(&cost(0,0), width*height, std::numeric_limits<float>::max());
 
@@ -180,7 +180,7 @@ Image filter_cost_volume(Image im1Color, Image im2Color,
             for(int x=0; x<width; x++)
                 if(cost(x,y) >= b(x,y)) {
                     cost(x,y) = b(x,y);
-                    disparity(x,y) = d;
+                    disparity(x,y) = static_cast<float>(d);
                 }
     }
     std::cout << std::endl;

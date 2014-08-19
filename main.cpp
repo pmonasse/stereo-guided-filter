@@ -129,17 +129,18 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    Image disparity = filter_cost_volume(im1, im2, dMin, dMax, paramGF);
-    if(! save_disparity(OUTFILE1, disparity, dMin,dMax, grayMin,grayMax)) {
+    Image disp = filter_cost_volume(im1, im2, dMin, dMax, paramGF);
+    if(! save_disparity(OUTFILE1, disp, dMin,dMax, grayMin,grayMax)) {
         std::cerr << "Error writing file " << OUTFILE1 << std::endl;
         return 1;
     }
 
     if(detectOcc) {
         std::cout << "Detect occlusions...";
-        Image disparity2= filter_cost_volume(im2,im1,-dMax,-dMin,paramGF);
-        detect_occlusion(disparity, disparity2, dMin-1, paramOcc.tol_disp);
-        if(! save_disparity(OUTFILE2, disparity, dMin,dMax, grayMin,grayMax))  {
+        Image disp2= filter_cost_volume(im2,im1,-dMax,-dMin,paramGF);
+        detect_occlusion(disp, disp2, static_cast<float>(dMin-1),
+                         paramOcc.tol_disp);
+        if(! save_disparity(OUTFILE2, disp, dMin,dMax, grayMin,grayMax))  {
             std::cerr << "Error writing file " << OUTFILE2 << std::endl;
             return 1;
         }
@@ -147,11 +148,11 @@ int main(int argc, char *argv[])
 
     if(fillOcc) {
         std::cout << "Post-processing: fill occlusions" << std::endl;
-        Image dispDense = disparity.clone();
+        Image dispDense = disp.clone();
         if(sense == 'r')
-            dispDense.fillMaxX(dMin);
+            dispDense.fillMaxX(static_cast<float>(dMin));
         else
-            dispDense.fillMinX(dMin);
+            dispDense.fillMinX(static_cast<float>(dMin));
         if(! save_disparity(OUTFILE3, dispDense, dMin,dMax, grayMin,grayMax)) {
             std::cerr << "Error writing file " << OUTFILE3 << std::endl;
             return 1;
@@ -159,8 +160,8 @@ int main(int argc, char *argv[])
 
         std::cout << "Post-processing: smooth the disparity map" << std::endl;
         fill_occlusion(dispDense, im1.medianColor(1),
-                       disparity, dMin, dMax, paramOcc);
-        if(! save_disparity(OUTFILE4, disparity, dMin,dMax, grayMin,grayMax)) {
+                       disp, dMin, dMax, paramOcc);
+        if(! save_disparity(OUTFILE4, disp, dMin,dMax, grayMin,grayMax)) {
             std::cerr << "Error writing file " << OUTFILE4 << std::endl;
             return 1;
         }

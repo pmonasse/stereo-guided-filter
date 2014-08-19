@@ -37,7 +37,7 @@ struct ParamOcclusion {
 };
 
 void detect_occlusion(Image& disparityLeft, const Image& disparityRight,
-                      int dOcclusion, int tol_disp);
+                      float dOcclusion, int tol_disp);
 void fill_occlusion(const Image& dispDense, const Image& guidance,
                     Image& disparity, int dispMin, int dispMax,
                     const ParamOcclusion& paramOcc);

@@ -35,7 +35,7 @@ struct ParamGuidedFilter {
       gradient_threshold(2),
       alpha(1-0.1f),
       kernel_radius(9),
-      epsilon(0.0001*255*255) {}
+      epsilon(0.0001f*255*255) {}
 };
 
 Image filter_cost_volume(Image im1Color, Image im2Color,

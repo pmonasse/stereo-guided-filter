@@ -23,7 +23,7 @@
 /// Detect left-right discrepancies in disparity and put incoherent pixels to
 /// value \a dOcclusion in \a disparityLeft.
 void detect_occlusion(Image& disparityLeft, const Image& disparityRight,
-                      int dOcclusion, int tolDisp) {
+                      float dOcclusion, int tolDisp) {
     const int w=disparityLeft.width(), h=disparityLeft.height();
     for(int y=0; y<h; y++)
         for(int x=0; x<w; x++) {

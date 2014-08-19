@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 {
     int grayMin=0, grayMax=255;
     int radius=9;
-    float epsilon = 0.0001*255*255;
+    float epsilon = 0.0001f*255*255;
     CmdLine cmd;
     cmd.add( make_option('R',radius) );
     cmd.add( make_option('E',epsilon) );
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
         std::cerr << "Error reading x or y" << std::endl;
         return 1;
     }
-    if(! (0<=x && x<width && 0<=y && y<height)) {
+    if(! (0<=x && (size_t)x<width && 0<=y && (size_t)y<height)) {
         std::cerr << "Error: point (x,y) must be inside the image" << std::endl;
         return 1;
     }
@@ -193,7 +193,7 @@ Image compute_weights(const Image& in, int x, int y, int r, float epsilon) {
     Image R=in.r(), G=in.g(), B=in.b();
     const int width=R.width(), height=R.height();
     Image W(width,height);
-    std::fill_n(&W(0,0), width*height, 0);
+    std::fill_n(&W(0,0), width*height, 0.0f);
 
     // Compute the mean and variance of each patch, eq. (14)
     Image meanR = R.boxFilter(r);
@@ -211,7 +211,7 @@ Image compute_weights(const Image& in, int x, int y, int r, float epsilon) {
     Image delta(width,height);
     for(int j=0; j<height; j++)
         for(int i=0; i<width; i++) {
-            std::fill_n(&delta(0,0), width*height, 0);
+            std::fill_n(&delta(0,0), width*height, 0.0f);
             delta(i,j) = 1.0f;
             Image meanCost = delta.boxFilter(r); // Eq. (14)
 
