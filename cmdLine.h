@@ -3,7 +3,7 @@
  * @brief Command line option parsing
  * @author Pascal Monasse
  * 
- * Copyright (c) 2012 Pascal Monasse
+ * Copyright (c) 2012-2014 Pascal Monasse
  * All rights reserved.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -102,8 +102,7 @@ public:
             param=std::string(argv[0]).substr(size); arg=1;
         }
         if(arg>0) {
-            std::stringstream str(param); char unused;
-            if((str >> _field).fail() || !(str>>unused).fail())
+            if(! read_param(param))
                 throw std::string("Unable to interpret ")
                     +param+" as argument of "+argv[0];
             used = true;
@@ -113,6 +112,11 @@ public:
         }
         return false;
     }
+    /// Decode the string as template type T
+    bool read_param(const std::string& param) {
+        std::stringstream str(param);
+        return !((str >> _field).fail() || !str.eof());
+    }
     /// Copy
     Option* clone() const {
         return new OptionField<T>(c, _field, longName);
@@ -120,6 +124,14 @@ public:
 private:
     T& _field; ///< Reference to variable where to store the value
 };
+
+/// Template specialization to be able to take parameter including space.
+/// Generic method would do >>_field (stops at space) and test eof (false).
+template <>
+inline bool OptionField<std::string>::read_param(const std::string& param) {
+    _field = param;
+    return true;
+}
 
 /// New switch option
 OptionSwitch make_switch(char c, std::string name="") {

@@ -1,15 +1,15 @@
 Stereo Disparity through Cost Aggregation with Guided Filter
 Pauline Tan, <pauline.tan@ens-cachan.fr>, CMLA, ENS Cachan, France
 Pascal Monasse, <monasse@imagine.enpc.fr>, LIGM, Univ. Paris-Est, France
-Version 1.0-rc5 released on 2014/08/19
+Version 1.0 released on 2014/10/16
 Future releases and updates:
-https://github.com/pmonasse/cost-volume-filter.git
+https://github.com/pmonasse/stereo-guided-filter
 
 - Requirements
 CMake for the build system (http://www.cmake.org/)
 
 - Build
-cd cost-volume-filter_1.0
+cd stereo-guided-filter_1.0
 mkdir Build && cd Build
 cmake -D CMAKE_BUILD_TYPE:string=Release ..
 make
