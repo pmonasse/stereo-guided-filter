@@ -114,8 +114,8 @@ public:
     }
     /// Decode the string as template type T
     bool read_param(const std::string& param) {
-        std::stringstream str(param);
-        return !((str >> _field).fail() || !str.eof());
+        std::stringstream str(param); char unused;
+        return !((str >> _field).fail() || !(str>>unused).fail());
     }
     /// Copy
     Option* clone() const {
@@ -126,7 +126,7 @@ private:
 };
 
 /// Template specialization to be able to take parameter including space.
-/// Generic method would do >>_field (stops at space) and test eof (false).
+/// Generic method would do >>_field (stops at space) and signal unused chars.
 template <>
 inline bool OptionField<std::string>::read_param(const std::string& param) {
     _field = param;
