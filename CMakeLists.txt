@@ -1,21 +1,21 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+cmake_minimum_required(VERSION 2.6)
 
-FIND_PACKAGE(PNG)
+find_package(PNG)
 
-IF(NOT PNG_FOUND)
-    FIND_PACKAGE(ZLIB)
-    IF(NOT ZLIB_FOUND)
-        ADD_SUBDIRECTORY(third_party/zlib-1.2.8)
-    ENDIF(NOT ZLIB_FOUND)
-    INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIRS})
-    ADD_SUBDIRECTORY(third_party/libpng-1.6.12)
-    INCLUDE_DIRECTORIES(${PNG_INCLUDE_DIRS})
-ENDIF(NOT PNG_FOUND)
+if(NOT PNG_FOUND)
+    find_package(ZLIB)
+    if(NOT ZLIB_FOUND)
+        add_subdirectory(third_party/zlib-1.2.8)
+    endif(NOT ZLIB_FOUND)
+    include_directories(${ZLIB_INCLUDE_DIRS})
+    add_subdirectory(third_party/libpng-1.6.12)
+    include_directories(${PNG_INCLUDE_DIRS})
+endif(NOT PNG_FOUND)
 
-SET(SRC_C
+set(SRC_C
     io_png.c io_png.h)
 
-SET(SRC
+set(SRC
     cmdLine.h
     costVolume.cpp costVolume.h
     filters.cpp
@@ -23,28 +23,28 @@ SET(SRC
     main.cpp
     occlusion.cpp occlusion.h)
 
-ADD_EXECUTABLE(stereoGuidedFilter ${SRC} ${SRC_C})
-TARGET_LINK_LIBRARIES(stereoGuidedFilter ${PNG_LIBRARIES})
+add_executable(stereoGuidedFilter ${SRC} ${SRC_C})
+target_link_libraries(stereoGuidedFilter ${PNG_LIBRARIES})
 
-ADD_EXECUTABLE(show_weights
+add_executable(show_weights
   cmdLine.h filters.cpp image.cpp image.h main_weights.cpp ${SRC_C})
-TARGET_LINK_LIBRARIES(show_weights ${PNG_LIBRARIES})
+target_link_libraries(show_weights ${PNG_LIBRARIES})
 
-FIND_PACKAGE(OpenMP)
-IF(OPENMP_FOUND)
-    SET_TARGET_PROPERTIES(stereoGuidedFilter PROPERTIES
+find_package(OpenMP)
+if(OPENMP_FOUND)
+    set_target_properties(stereoGuidedFilter PROPERTIES
                           COMPILE_FLAGS ${OpenMP_CXX_FLAGS})
-ENDIF(OPENMP_FOUND)
+    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+        set(CMAKE_EXE_LINKER_FLAGS ${OpenMP_CXX_FLAGS})
+    endif(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+endif(OPENMP_FOUND)
 
-IF(UNIX)
-    SET_SOURCE_FILES_PROPERTIES(${SRC} PROPERTIES
-                                COMPILE_FLAGS "-Wall -Wextra -Werror -std=c++98 ${OpenMP_CXX_FLAGS}")
-    SET_SOURCE_FILES_PROPERTIES(${SRC_C} PROPERTIES
+if(UNIX)
+    set_source_files_properties(${SRC} PROPERTIES
+                                COMPILE_FLAGS "-Wall -Wextra -Werror -std=c++98")
+    set_source_files_properties(${SRC_C} PROPERTIES
                                 COMPILE_FLAGS "-Wall -Wextra -Werror -std=c89")
-    IF(OPENMP_FOUND)
-        SET(CMAKE_EXE_LINKER_FLAGS ${OpenMP_CXX_FLAGS})
-    ENDIF(OPENMP_FOUND)
-ENDIF(UNIX)
-IF(MSVC)
+endif(UNIX)
+if(MSVC)
     ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
-ENDIF(MSVC)
+endif(MSVC)
