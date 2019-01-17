@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-find_package(PNG)
+#find_package(PNG)
 
 if(NOT PNG_FOUND)
     find_package(ZLIB)
@@ -9,8 +9,10 @@ if(NOT PNG_FOUND)
     endif(NOT ZLIB_FOUND)
     include_directories(${ZLIB_INCLUDE_DIRS})
     add_subdirectory(third_party/libpng-1.6.12)
-    include_directories(${PNG_INCLUDE_DIRS})
 endif(NOT PNG_FOUND)
+
+add_definitions(${PNG_DEFINITIONS})
+include_directories(${PNG_INCLUDE_DIRS})
 
 set(SRC_C
     io_png.c io_png.h)
