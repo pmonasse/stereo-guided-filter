@@ -1,7 +1,7 @@
 Stereo Disparity through Cost Aggregation with Guided Filter
 Pauline Tan, <pauline.tan@ens-cachan.fr>, CMLA, ENS Cachan, France
 Pascal Monasse, <monasse@imagine.enpc.fr>, LIGM, Univ. Paris-Est, France
-Version 1.0 released on 2014/10/16
+Version 1.1 released on 2023/02/15
 Future releases and updates:
 https://github.com/pmonasse/stereo-guided-filter
 
