@@ -102,6 +102,12 @@ static void _io_png_err_hdl(png_structp png_ptr, png_const_charp msg)
     longjmp(err_ptr->jmpbuf, 1);
 }
 
+/* Indirection to avoid warning with gcc 4.9 */
+static int call_setjmp(jmp_buf* env) {
+    if(setjmp(*env)) return 1;
+    return 0;
+}
+
 /*
  * READ
  */
@@ -191,7 +197,7 @@ static void *io_png_read_raw(const char *fname,
         return _io_png_read_abort(fp, &png_ptr, NULL);
 
     /* handle read errors */
-    if (setjmp(err.jmpbuf))
+    if (call_setjmp(&err.jmpbuf))
         /* if we get here, we had a problem reading from the file */
         return _io_png_read_abort(fp, &png_ptr, NULL);
 
@@ -602,7 +608,7 @@ static int io_png_write_raw(const char *fname, const void *data,
         return _io_png_write_abort(fp, idata, row_pointers, &png_ptr, NULL);
 
     /* handle write errors */
-    if (0 != setjmp(err.jmpbuf))
+    if (0 != call_setjmp(&err.jmpbuf))
         /* if we get here, we had a problem writing to the file */
         return _io_png_write_abort(fp, idata, row_pointers, &png_ptr,
                                    &info_ptr);
@@ -727,7 +733,7 @@ int io_png_write_u8(const char *fname, const unsigned char *data,
  * @return 0 if everything OK, -1 if an error occured
  */
 int io_png_write_f32(const char *fname, const float *data,
-                  size_t nx, size_t ny, size_t nc)
+                     size_t nx, size_t ny, size_t nc)
 {
     return io_png_write_raw(fname, (void *) data,
                             (png_uint_32) nx, (png_uint_32) ny, (png_byte) nc,
